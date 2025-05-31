@@ -51,3 +51,8 @@ secrets/
 *.backup
 *.bak
 
+# Ignore html directory
+html/
+
+rel/
+priv/resource_snapshots
