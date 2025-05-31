@@ -14,7 +14,7 @@ defmodule Offtherecord.Record.Post do
   end
 
   actions do
-    default_accept [:content, :date]
+    default_accept [:content, :date, :image_url]
     defaults [:create, :read, :update, :destroy]
   end
 
@@ -26,10 +26,15 @@ defmodule Offtherecord.Record.Post do
       public? true
     end
 
-    attribute :date, :date do
+    attribute :date, :utc_datetime do
       allow_nil? false
       public? true
-      default &Date.utc_today/0
+      default &DateTime.utc_now/0
+    end
+
+    attribute :image_url, :string do
+      allow_nil? true
+      public? true
     end
 
     create_timestamp :created_at
