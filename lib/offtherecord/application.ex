@@ -17,7 +17,9 @@ defmodule Offtherecord.Application do
       # Start a worker by calling: Offtherecord.Worker.start_link(arg)
       # {Offtherecord.Worker, arg},
       # Start to serve requests, typically the last entry
-      OfftherecordWeb.Endpoint
+      OfftherecordWeb.Endpoint,
+      {Absinthe.Subscription, OfftherecordWeb.Endpoint},
+      AshGraphql.Subscription.Batcher
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
