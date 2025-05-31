@@ -6,6 +6,16 @@ defmodule Offtherecord.Record.Post do
 
   json_api do
     type "post"
+
+    routes do
+      base "/posts"
+
+      get :read
+      index :read
+      post :create
+      patch :update, route: "/:id"
+      delete :destroy, route: "/:id"
+    end
   end
 
   graphql do
