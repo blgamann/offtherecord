@@ -2,7 +2,7 @@ defmodule OfftherecordWeb.GraphqlSchema do
   use Absinthe.Schema
 
   use AshGraphql,
-    domains: []
+    domains: [Offtherecord.Record]
 
   import_types Absinthe.Plug.Types
 

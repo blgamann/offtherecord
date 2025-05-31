@@ -2,10 +2,25 @@ defmodule Offtherecord.Record.Post do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     domain: Offtherecord.Record,
-    extensions: [AshJsonApi.Resource]
+    extensions: [AshJsonApi.Resource, AshGraphql.Resource]
 
   json_api do
     type "post"
+  end
+
+  graphql do
+    type :post
+
+    queries do
+      get :post, :read
+      list :posts, :read
+    end
+
+    mutations do
+      create :create_post, :create
+      update :update_post, :update
+      destroy :delete_post, :destroy
+    end
   end
 
   postgres do
