@@ -44,6 +44,7 @@ config :spark,
   ]
 
 config :offtherecord,
+  ash_domains: [Offtherecord.Record],
   ecto_repos: [Offtherecord.Repo],
   generators: [timestamp_type: :utc_datetime]
 
