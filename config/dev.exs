@@ -1,5 +1,14 @@
 import Config
 
+# Load .env file in development
+if Mix.env() == :dev do
+  try do
+    Dotenv.load()
+  rescue
+    _ -> :ok
+  end
+end
+
 # Configure your database
 config :offtherecord, Offtherecord.Repo,
   username: "postgres",

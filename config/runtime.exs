@@ -5,6 +5,30 @@ import Config
 # system starts, so it is typically used to load production configuration
 # and secrets from environment variables or elsewhere. Do not define
 # any compile-time configuration in here, as it won't be applied.
+
+# Configure Google OAuth at runtime to read from environment variables
+config :offtherecord, AshAuthentication.Strategy.Google,
+  client_id: System.get_env("GOOGLE_CLIENT_ID") || "your-google-client-id",
+  client_secret: System.get_env("GOOGLE_CLIENT_SECRET") || "your-google-client-secret",
+  redirect_uri:
+    System.get_env("GOOGLE_REDIRECT_URI") || "http://localhost:4000/auth/user/google/callback"
+
+config :offtherecord, AshAuthentication,
+  signing_secret:
+    System.get_env("TOKEN_SIGNING_SECRET") || "change-this-to-a-real-secret-in-production"
+
+# Configure ExTwilio at runtime
+config :ex_twilio,
+  account_sid: System.get_env("TWILIO_ACCOUNT_SID"),
+  auth_token: System.get_env("TWILIO_AUTH_TOKEN")
+
+# Configure SMS provider
+if System.get_env("TWILIO_ACCOUNT_SID") && System.get_env("TWILIO_AUTH_TOKEN") do
+  config :offtherecord, :sms_provider, :twilio
+else
+  config :offtherecord, :sms_provider, :test
+end
+
 # The block below contains prod specific runtime configuration.
 
 # ## Using releases

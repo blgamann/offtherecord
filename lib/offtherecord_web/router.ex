@@ -1,5 +1,6 @@
 defmodule OfftherecordWeb.Router do
   use OfftherecordWeb, :router
+  use AshAuthentication.Phoenix.Router
 
   pipeline :graphql do
     plug AshGraphql.Plug
@@ -12,6 +13,11 @@ defmodule OfftherecordWeb.Router do
     plug :put_root_layout, html: {OfftherecordWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug OfftherecordWeb.UserAuth, :fetch_current_user
+  end
+
+  pipeline :require_authenticated_user do
+    plug OfftherecordWeb.UserAuth, :require_authenticated_user
   end
 
   pipeline :api do
@@ -42,7 +48,19 @@ defmodule OfftherecordWeb.Router do
   scope "/", OfftherecordWeb do
     pipe_through :browser
 
+    get "/auth/sms/success", AuthController, :sms_login_success, as: :sms_success
+    auth_routes(AuthController, Offtherecord.Accounts.User, path: "/auth")
+    sign_out_route(AuthController)
+
     get "/", PageController, :home
+    live "/login", AuthLive, :login
+    live "/sms-login", SmsAuthLive, :index
+  end
+
+  scope "/", OfftherecordWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live "/dashboard", DashboardLive, :index
   end
 
   # Other scopes may use custom stacks.

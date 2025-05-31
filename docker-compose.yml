@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      # Database
+      DATABASE_URL: "ecto://postgres:postgres@db:5432/offtherecord_prod"
+
+      # Google OAuth - 환경 변수나 secrets로 주입
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET}"
+      GOOGLE_REDIRECT_URI: "${GOOGLE_REDIRECT_URI:-http://localhost:4000/auth/user/google/callback}"
+
+      # Security
+      TOKEN_SIGNING_SECRET: "${TOKEN_SIGNING_SECRET}"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
+
+      # Phoenix
+      PHX_HOST: "${PHX_HOST:-localhost}"
+      PHX_SERVER: "true"
+      PORT: "4000"
+
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: offtherecord_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
