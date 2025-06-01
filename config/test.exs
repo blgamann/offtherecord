@@ -17,7 +17,10 @@ config :offtherecord, Offtherecord.Repo,
 # you can enable the server option below.
 config :offtherecord, OfftherecordWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "DDJ2Tzg3Sd6f+e/XhfdqqO5AP5SfseL3kJRrnMFxhigJ/Vdeg4WPS4+1wu2CsSvz",
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE_TEST") ||
+      System.get_env("SECRET_KEY_BASE") ||
+      "test_fallback_key_#{System.system_time()}",
   server: false
 
 # In test we don't send emails

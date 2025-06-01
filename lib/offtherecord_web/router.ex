@@ -20,31 +20,6 @@ defmodule OfftherecordWeb.Router do
     plug OfftherecordWeb.UserAuth, :require_authenticated_user
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
-  scope "/gql" do
-    pipe_through [:graphql]
-
-    forward "/playground", Absinthe.Plug.GraphiQL,
-      schema: Module.concat(["OfftherecordWeb.GraphqlSchema"]),
-      socket: Module.concat(["OfftherecordWeb.GraphqlSocket"]),
-      interface: :simple
-
-    forward "/", Absinthe.Plug, schema: Module.concat(["OfftherecordWeb.GraphqlSchema"])
-  end
-
-  scope "/api/json" do
-    pipe_through [:api]
-
-    forward "/swaggerui", OpenApiSpex.Plug.SwaggerUI,
-      path: "/api/json/open_api",
-      default_model_expand_depth: 4
-
-    forward "/", OfftherecordWeb.AshJsonApiRouter
-  end
-
   scope "/", OfftherecordWeb do
     pipe_through :browser
 
@@ -52,7 +27,6 @@ defmodule OfftherecordWeb.Router do
     auth_routes(AuthController, Offtherecord.Accounts.User, path: "/auth")
     sign_out_route(AuthController)
 
-    get "/", PageController, :home
     live "/login", AuthLive, :login
     live "/sms-login", SmsAuthLive, :index
   end
@@ -60,7 +34,7 @@ defmodule OfftherecordWeb.Router do
   scope "/", OfftherecordWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/dashboard", DashboardLive, :index
+    live "/", PostsLive, :index
   end
 
   # Other scopes may use custom stacks.

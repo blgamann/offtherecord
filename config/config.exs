@@ -79,7 +79,9 @@ config :offtherecord, OfftherecordWeb.Endpoint,
     layout: false
   ],
   pubsub_server: Offtherecord.PubSub,
-  live_view: [signing_salt: "sQ+p7gE+"]
+  live_view: [
+    signing_salt: System.get_env("LIVE_VIEW_SIGNING_SALT") || "dev-salt-#{System.system_time()}"
+  ]
 
 # Configures the mailer
 #
@@ -119,6 +121,9 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Configure timezone database
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

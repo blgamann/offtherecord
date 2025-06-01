@@ -21,7 +21,7 @@ defmodule OfftherecordWeb.UserAuth do
   def redirect_if_user_is_authenticated(conn, _opts) do
     if get_session(conn, "user_token") do
       conn
-      |> Phoenix.Controller.redirect(to: "/dashboard")
+      |> Phoenix.Controller.redirect(to: "/")
       |> halt()
     else
       conn

@@ -16,9 +16,7 @@ defmodule Offtherecord.Accounts.User do
         end)
 
         redirect_uri(fn _secret_name, _resource ->
-          {:ok,
-           System.get_env("GOOGLE_REDIRECT_URI") ||
-             "http://localhost:4000/auth/user/google/callback"}
+          {:ok, System.get_env("GOOGLE_REDIRECT_URI")}
         end)
       end
     end

@@ -3,7 +3,7 @@ defmodule OfftherecordWeb.AuthController do
   use AshAuthentication.Phoenix.Controller
 
   def success(conn, _activity, user, _token) do
-    return_to = get_session(conn, :return_to) || ~p"/dashboard"
+    return_to = get_session(conn, :return_to) || ~p"/"
 
     # Generate a simple token for session
     token = "user_token_#{user.id}"
@@ -42,7 +42,7 @@ defmodule OfftherecordWeb.AuthController do
         |> put_session("user_token", token)
         |> assign(:current_user, user)
         |> put_flash(:info, "로그인되었습니다!")
-        |> redirect(to: ~p"/dashboard")
+        |> redirect(to: ~p"/")
 
       {:error, _} ->
         conn

@@ -7,15 +7,6 @@ defmodule Offtherecord.Application do
 
   @impl true
   def start(_type, _args) do
-    # Load .env file in development
-    if Mix.env() == :dev do
-      try do
-        Dotenv.load()
-      rescue
-        _ -> :ok
-      end
-    end
-
     children = [
       OfftherecordWeb.Telemetry,
       Offtherecord.Repo,

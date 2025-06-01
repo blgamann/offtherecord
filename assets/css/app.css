@@ -3,3 +3,75 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+/* whitespace-pre-line 첫 줄 개행 문제 완전 해결 */
+.whitespace-pre-line {
+  white-space: pre-line;
+  /* 첫 줄 들여쓰기 강제 제거 */
+  text-indent: 0 !important;
+  /* 블록 요소 기본 마진/패딩 제거 */
+  margin: 0;
+  padding: 0;
+}
+
+/* 첫 줄 상단 여백 완전 제거 */
+.whitespace-pre-line::first-line {
+  line-height: inherit;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  text-indent: 0 !important;
+}
+
+/* 첫 번째 문자 들여쓰기 제거 */
+.whitespace-pre-line::first-letter {
+  margin-left: 0 !important;
+  text-indent: 0 !important;
+}
+
+/* Horizontal scroll styling */
+.horizontal-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+}
+
+.horizontal-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.horizontal-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .horizontal-scroll-container .flex-none {
+    width: 280px; /* Smaller cards on mobile */
+  }
+  
+  .horizontal-scroll-container::-webkit-scrollbar {
+    height: 6px; /* Thinner scrollbar on mobile */
+  }
+}
+
+/* Hide scrollbar on mobile but keep functionality */
+@media (max-width: 640px) {
+  .horizontal-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .horizontal-scroll-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}

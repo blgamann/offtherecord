@@ -1,14 +1,5 @@
 import Config
 
-# Load .env file in development
-if Mix.env() == :dev do
-  try do
-    Dotenv.load()
-  rescue
-    _ -> :ok
-  end
-end
-
 # Configure your database
 config :offtherecord, Offtherecord.Repo,
   username: "postgres",
@@ -28,11 +19,13 @@ config :offtherecord, Offtherecord.Repo,
 # Binding to loopback ipv4 address prevents access from other machines.
 config :offtherecord, OfftherecordWeb.Endpoint,
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "amDcTCWEaQzYrKVcSo7QeWrr8AgBlaHbjHq6QAj6oA1n1sLscne9hC9UF4XjEelg",
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE") ||
+      "dev_fallback_key_for_local_development_only_not_for_production_#{System.system_time()}_ensure_64_bytes",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:offtherecord, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:offtherecord, ~w(--watch)]}
@@ -51,7 +44,7 @@ config :offtherecord, OfftherecordWeb.Endpoint,
 # The `http:` config above can be replaced with:
 #
 #     https: [
-#       port: 4001,
+#       port: 4000,
 #       cipher_suite: :strong,
 #       keyfile: "priv/cert/selfsigned_key.pem",
 #       certfile: "priv/cert/selfsigned.pem"
@@ -92,3 +85,6 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Note: Environment variable configuration is now handled in config/runtime.exs
+# using the centralized Offtherecord.Config.Settings module
