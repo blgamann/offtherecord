@@ -42,7 +42,7 @@ defmodule OfftherecordWeb.AuthLive do
               Sign in to continue to your account
             </p>
           </div>
-          
+
     <!-- Google Sign-in Button -->
           <div class="space-y-4">
             <a
@@ -82,7 +82,7 @@ defmodule OfftherecordWeb.AuthLive do
                 />
               </svg>
             </a>
-            
+
     <!-- SMS Login Button -->
             <a
               href={~p"/sms-login"}
@@ -111,7 +111,7 @@ defmodule OfftherecordWeb.AuthLive do
                 />
               </svg>
             </a>
-            
+
     <!-- Additional features or links -->
             <div class="text-center">
               <p class="text-xs text-gray-400">
@@ -127,7 +127,7 @@ defmodule OfftherecordWeb.AuthLive do
             </div>
           </div>
         </div>
-        
+
     <!-- Bottom text -->
         <div class="text-center">
           <p class="text-sm text-gray-400">

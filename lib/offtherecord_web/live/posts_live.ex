@@ -13,7 +13,8 @@ defmodule OfftherecordWeb.PostsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    posts = list_posts()
+    current_user = socket.assigns.current_user
+    posts = list_posts(current_user)
 
     IO.inspect(posts)
 
@@ -59,9 +60,13 @@ defmodule OfftherecordWeb.PostsLive do
         # 업로드된 이미지 URL이 있으면 사용, 없으면 빈 문자열
         image_url = socket.assigns.uploaded_image_url || ""
 
-        case create_post(%{content: content, image_url: image_url}) do
+        case create_post(%{
+               content: content,
+               image_url: image_url,
+               user_id: socket.assigns.current_user.id
+             }) do
           {:ok, _post} ->
-            posts = list_posts()
+            posts = list_posts(socket.assigns.current_user)
 
             socket =
               socket
@@ -203,7 +208,7 @@ defmodule OfftherecordWeb.PostsLive do
   def handle_event("delete_post", %{"id" => id}, socket) do
     case delete_post(id) do
       :ok ->
-        posts = list_posts()
+        posts = list_posts(socket.assigns.current_user)
 
         socket =
           socket
@@ -334,10 +339,15 @@ defmodule OfftherecordWeb.PostsLive do
   end
 
   # Private functions for data operations
-  defp list_posts do
-    case Ash.read(Post, domain: Offtherecord.Record) do
-      {:ok, posts} -> Enum.sort_by(posts, & &1.created_at, {:desc, DateTime})
-      {:error, _} -> []
+  defp list_posts(current_user) do
+    case Ash.read(Post, domain: Offtherecord.Record, load: [:user]) do
+      {:ok, posts} ->
+        posts
+        |> Enum.filter(fn post -> post.user_id == current_user.id end)
+        |> Enum.sort_by(& &1.created_at, {:desc, DateTime})
+
+      {:error, _} ->
+        []
     end
   end
 

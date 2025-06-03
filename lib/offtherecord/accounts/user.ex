@@ -48,7 +48,7 @@ defmodule Offtherecord.Accounts.User do
       accept [:email, :name, :picture, :phone_number]
     end
 
-    # Google OAuth actions
+    # https://hexdocs.pm/ash_authentication/google.html
     create :register_with_google do
       argument :user_info, :map, allow_nil?: false
       argument :oauth_tokens, :map, allow_nil?: false
@@ -93,6 +93,12 @@ defmodule Offtherecord.Accounts.User do
     attribute :name, :string, public?: true
     attribute :picture, :string, public?: true
     timestamps()
+  end
+
+  relationships do
+    has_many :posts, Offtherecord.Record.Post do
+      public? true
+    end
   end
 
   identities do

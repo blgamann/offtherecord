@@ -12,7 +12,7 @@ defmodule Offtherecord.Config do
   def cloudflare_config do
     %{
       api_token: get_required_env("CLOUDFLARE_API_TOKEN"),
-      account_id: get_env("CLOUDFLARE_ACCOUNT_ID", "50871ed1a5d048465ef5453feedb23a8")
+      account_id: get_required_env("CLOUDFLARE_ACCOUNT_ID")
     }
   end
 
@@ -21,9 +21,9 @@ defmodule Offtherecord.Config do
   """
   def twilio_config do
     %{
-      account_sid: get_env("TWILIO_ACCOUNT_SID"),
-      auth_token: get_env("TWILIO_AUTH_TOKEN"),
-      phone_number: get_env("TWILIO_PHONE_NUMBER")
+      account_sid: get_required_env("TWILIO_ACCOUNT_SID"),
+      auth_token: get_required_env("TWILIO_AUTH_TOKEN"),
+      phone_number: get_required_env("TWILIO_PHONE_NUMBER")
     }
   end
 
@@ -34,7 +34,7 @@ defmodule Offtherecord.Config do
     %{
       client_id: get_required_env("GOOGLE_CLIENT_ID"),
       client_secret: get_required_env("GOOGLE_CLIENT_SECRET"),
-      redirect_uri: get_env("GOOGLE_REDIRECT_URI", default_google_redirect_uri())
+      redirect_uri: get_required_env("GOOGLE_REDIRECT_URI")
     }
   end
 
@@ -139,13 +139,6 @@ defmodule Offtherecord.Config do
 
       value ->
         value
-    end
-  end
-
-  defp default_google_redirect_uri do
-    case Mix.env() do
-      :prod -> "https://#{get_env("PHX_HOST", "example.com")}/auth/user/google/callback"
-      _ -> "https://offtherecord.im/auth/user/google/callback"
     end
   end
 

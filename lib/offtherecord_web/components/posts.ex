@@ -27,7 +27,7 @@ defmodule OfftherecordWeb.Components.Posts do
             class="w-full border-none outline-none text-lg leading-relaxed bg-transparent resize-none placeholder:text-slate-400 min-h-[120px] focus:ring-0"
           ><%= @form[:content].value %></textarea>
         </div>
-
+        
     <!-- Upload Error Display -->
         <%= if @upload_error do %>
           <div class="rounded-md bg-red-50 p-4 mb-4">
@@ -50,7 +50,7 @@ defmodule OfftherecordWeb.Components.Posts do
             </div>
           </div>
         <% end %>
-
+        
     <!-- Image Upload Section -->
         <div class="border-t border-slate-200 pt-6">
           <div class="flex items-center justify-between mb-4">
@@ -62,7 +62,7 @@ defmodule OfftherecordWeb.Components.Posts do
               </span>
             <% end %>
           </div>
-
+          
     <!-- Uploading State -->
           <%= if @uploading and @selected_file_info do %>
             <div class="mb-4">
@@ -81,7 +81,7 @@ defmodule OfftherecordWeb.Components.Posts do
               </div>
             </div>
           <% end %>
-
+          
     <!-- Image Preview -->
           <%= if @preview_image_url || @uploaded_image_url do %>
             <div class="mb-4">
@@ -91,7 +91,7 @@ defmodule OfftherecordWeb.Components.Posts do
                   alt="이미지 미리보기"
                   class="max-w-md rounded-lg shadow-sm max-h-64 object-cover"
                 />
-
+                
     <!-- Upload overlay -->
                 <%= if @uploading do %>
                   <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
@@ -105,7 +105,7 @@ defmodule OfftherecordWeb.Components.Posts do
                     </div>
                   </div>
                 <% end %>
-
+                
     <!-- Remove button -->
                 <%= if @uploaded_image_url && !@uploading do %>
                   <button
@@ -125,7 +125,7 @@ defmodule OfftherecordWeb.Components.Posts do
                   </button>
                 <% end %>
               </div>
-
+              
     <!-- Status message -->
               <%= if @uploaded_image_url && !@uploading do %>
                 <p class="text-sm text-green-600 mt-2">✓ 이미지가 준비되었습니다</p>
@@ -139,7 +139,7 @@ defmodule OfftherecordWeb.Components.Posts do
               <% end %>
             </div>
           <% end %>
-
+          
     <!-- File Upload Input -->
           <%= if !@preview_image_url && !@uploaded_image_url && !@upload_error do %>
             <div class="space-y-4">
@@ -318,6 +318,22 @@ defmodule OfftherecordWeb.Components.Posts do
   def post_content(assigns) do
     ~H"""
     <div class="flex-1 p-4 pt-3 bg-white flex flex-col">
+      <!-- 작성자 정보 -->
+      <%= if @post.user do %>
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
+          <%= if @post.user.picture do %>
+            <img src={@post.user.picture} alt="프로필" class="w-6 h-6 rounded-full" />
+          <% else %>
+            <div class="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center">
+              <span class="text-xs text-slate-600">👤</span>
+            </div>
+          <% end %>
+          <span class="text-xs text-slate-600 font-medium">
+            {display_user_name(@post.user)}
+          </span>
+        </div>
+      <% end %>
+
       <%= if @post.image_url && @post.image_url != "" do %>
         <div class="mb-2">
           <img
@@ -498,4 +514,13 @@ defmodule OfftherecordWeb.Components.Posts do
   end
 
   defp format_post_content(_), do: ""
+
+  # 사용자 이름 표시 헬퍼
+  defp display_user_name(user) do
+    cond do
+      user.name && String.trim(user.name) != "" -> user.name
+      user.email -> user.email
+      true -> "익명 사용자"
+    end
+  end
 end
