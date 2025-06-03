@@ -62,8 +62,7 @@ defmodule OfftherecordWeb.Router do
   scope "/api" do
     pipe_through :api_auth
 
-    forward "/json", AshJsonApi.Plug,
-      apis: [Offtherecord.Record]
+    forward "/json", AshJsonApi.Controllers.Router, domains: [Offtherecord.Record]
   end
 
   # GraphQL endpoint

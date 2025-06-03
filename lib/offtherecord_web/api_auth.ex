@@ -10,9 +10,11 @@ defmodule OfftherecordWeb.ApiAuth do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
          {:ok, user_id} <- extract_user_id_from_token(token),
          {:ok, user} <- load_user(user_id) do
-      assign(conn, :current_user, user)
+      conn
+      |> assign(:current_user, user)
+      |> Ash.PlugHelpers.set_actor(user)
     else
-      _ ->
+      _error ->
         conn
         |> put_status(:unauthorized)
         |> Phoenix.Controller.json(%{error: "Unauthorized"})
@@ -20,12 +22,12 @@ defmodule OfftherecordWeb.ApiAuth do
     end
   end
 
-  defp extract_user_id_from_token(token) do
-    case Offtherecord.Accounts.Token.verify(token) do
-      {:ok, %{"user_id" => user_id}} -> {:ok, user_id}
-      _ -> :error
-    end
+  def get_current_user(conn) do
+    conn.assigns[:current_user]
   end
+
+  defp extract_user_id_from_token("user_token_" <> user_id), do: {:ok, user_id}
+  defp extract_user_id_from_token(_), do: :error
 
   defp load_user(user_id) do
     case Ash.get(Offtherecord.Accounts.User, user_id, domain: Offtherecord.Accounts) do

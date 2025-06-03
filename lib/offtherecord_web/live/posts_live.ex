@@ -60,11 +60,13 @@ defmodule OfftherecordWeb.PostsLive do
         # 업로드된 이미지 URL이 있으면 사용, 없으면 빈 문자열
         image_url = socket.assigns.uploaded_image_url || ""
 
-        case create_post(%{
-               content: content,
-               image_url: image_url,
-               user_id: socket.assigns.current_user.id
-             }) do
+        case create_post(
+               %{
+                 content: content,
+                 image_url: image_url
+               },
+               socket.assigns.current_user
+             ) do
           {:ok, _post} ->
             posts = list_posts(socket.assigns.current_user)
 
@@ -206,7 +208,7 @@ defmodule OfftherecordWeb.PostsLive do
 
   @impl true
   def handle_event("delete_post", %{"id" => id}, socket) do
-    case delete_post(id) do
+    case delete_post(id, socket.assigns.current_user) do
       :ok ->
         posts = list_posts(socket.assigns.current_user)
 
@@ -340,10 +342,9 @@ defmodule OfftherecordWeb.PostsLive do
 
   # Private functions for data operations
   defp list_posts(current_user) do
-    case Ash.read(Post, domain: Offtherecord.Record, load: [:user]) do
+    case Ash.read(Post, domain: Offtherecord.Record, actor: current_user, load: [:user]) do
       {:ok, posts} ->
         posts
-        |> Enum.filter(fn post -> post.user_id == current_user.id end)
         |> Enum.sort_by(& &1.created_at, {:desc, DateTime})
 
       {:error, _} ->
@@ -351,18 +352,18 @@ defmodule OfftherecordWeb.PostsLive do
     end
   end
 
-  defp create_post(attrs) do
+  defp create_post(attrs, current_user) do
     Post
-    |> Ash.Changeset.for_create(:create, attrs)
+    |> Ash.Changeset.for_create(:create, attrs, actor: current_user)
     |> Ash.create(domain: Offtherecord.Record)
   end
 
-  defp delete_post(id) do
-    case Ash.get(Post, id, domain: Offtherecord.Record) do
+  defp delete_post(id, current_user) do
+    case Ash.get(Post, id, domain: Offtherecord.Record, actor: current_user) do
       {:ok, post} ->
         post
         |> Ash.Changeset.for_destroy(:destroy)
-        |> Ash.destroy(domain: Offtherecord.Record)
+        |> Ash.destroy(domain: Offtherecord.Record, actor: current_user)
 
       {:error, _} ->
         {:error, :not_found}

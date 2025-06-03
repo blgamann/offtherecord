@@ -4,12 +4,12 @@ defmodule Offtherecord.Accounts.Token do
     domain: Offtherecord.Accounts,
     data_layer: AshPostgres.DataLayer
 
+  token do
+    domain Offtherecord.Accounts
+  end
+
   postgres do
     table "tokens"
     repo Offtherecord.Repo
-  end
-
-  token do
-    domain Offtherecord.Accounts
   end
 end
