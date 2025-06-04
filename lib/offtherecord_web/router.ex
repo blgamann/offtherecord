@@ -34,12 +34,10 @@ defmodule OfftherecordWeb.Router do
   scope "/", OfftherecordWeb do
     pipe_through :browser
 
-    get "/auth/sms/success", AuthGoogleController, :sms_login_success, as: :sms_success
     auth_routes(AuthGoogleController, Offtherecord.Accounts.User, path: "/auth")
     sign_out_route(AuthGoogleController)
 
     live "/login", AuthLive, :login
-    live "/sms-login", SmsAuthLive, :index
   end
 
   # routes for browser access
@@ -69,7 +67,7 @@ defmodule OfftherecordWeb.Router do
   scope "/graphql" do
     pipe_through :api
 
-    forward "/", Absinthe.Plug, schema: OfftherecordWeb.Schema
+    forward "/", Absinthe.Plug, schema: OfftherecordWeb.GraphqlSchema
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

@@ -44,7 +44,6 @@ end
 db_config = Settings.database_config()
 web_config = Settings.web_config()
 oauth_config = Settings.oauth_config()
-sms_config = Settings.sms_config()
 cloudflare_config = Settings.cloudflare_config()
 auth_config = Settings.auth_config()
 
@@ -73,20 +72,6 @@ IO.puts("========================")
 
 # Configure AshAuthentication
 config :offtherecord, AshAuthentication, signing_secret: auth_config.token_signing_secret
-
-# Configure ExTwilio
-config :ex_twilio,
-  account_sid: sms_config.account_sid,
-  auth_token: sms_config.auth_token
-
-# Configure SMS provider based on available credentials
-config :offtherecord, :sms_provider, Settings.sms_provider()
-
-if Settings.sms_provider() == :twilio do
-  IO.puts("=== Twilio SMS configured ===")
-else
-  IO.puts("=== Using test SMS provider ===")
-end
 
 # Enable Phoenix server if requested
 if web_config.server do
@@ -135,7 +120,6 @@ if config_env() == :prod do
   Port: #{web_config.port}
   Database Pool Size: #{db_config.pool_size}
   IPv6: #{db_config.ipv6}
-  SMS Provider: #{Settings.sms_provider()}
   Cloudflare: #{if Settings.cloudflare_configured?(), do: "enabled", else: "disabled"}
   ============================
   """)

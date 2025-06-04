@@ -38,8 +38,6 @@ defmodule Offtherecord.MixProject do
       {:ash_authentication_phoenix, "~> 2.0"},
       {:tidewave, "~> 0.1", only: [:dev]},
       {:dotenv, "~> 3.0", only: [:dev]},
-      # SMS/Phone authentication
-      {:ex_twilio, "~> 0.9"},
       {:absinthe_phoenix, "~> 2.0"},
       {:ash_graphql, "~> 1.0"},
       {:open_api_spex, "~> 3.0"},

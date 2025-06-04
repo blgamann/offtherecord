@@ -42,7 +42,7 @@ defmodule OfftherecordWeb.AuthLive do
               Sign in to continue to your account
             </p>
           </div>
-
+          
     <!-- Google Sign-in Button -->
           <div class="space-y-4">
             <a
@@ -82,36 +82,7 @@ defmodule OfftherecordWeb.AuthLive do
                 />
               </svg>
             </a>
-
-    <!-- SMS Login Button -->
-            <a
-              href={~p"/sms-login"}
-              class="group relative w-full flex justify-center items-center py-4 px-6 border border-white/20 text-sm font-medium rounded-xl text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg backdrop-blur-sm"
-            >
-              <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-              </svg>
-              <span class="text-white font-medium">Continue with Phone</span>
-              <svg
-                class="ml-3 w-4 h-4 text-white/70 group-hover:text-white transition-colors duration-200"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </a>
-
+            
     <!-- Additional features or links -->
             <div class="text-center">
               <p class="text-xs text-gray-400">
@@ -127,7 +98,7 @@ defmodule OfftherecordWeb.AuthLive do
             </div>
           </div>
         </div>
-
+        
     <!-- Bottom text -->
         <div class="text-center">
           <p class="text-sm text-gray-400">

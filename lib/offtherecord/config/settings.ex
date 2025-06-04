@@ -111,26 +111,6 @@ defmodule Offtherecord.Config.Settings do
   end
 
   @doc """
-  Gets SMS/Twilio configuration from environment variables.
-  """
-  def sms_config do
-    %{
-      account_sid:
-        Env.get_env("TWILIO_ACCOUNT_SID",
-          description: "Twilio account SID for SMS functionality"
-        ),
-      auth_token:
-        Env.get_env("TWILIO_AUTH_TOKEN",
-          description: "Twilio auth token for SMS functionality"
-        ),
-      phone_number:
-        Env.get_env("TWILIO_PHONE_NUMBER",
-          description: "Twilio phone number for sending SMS"
-        )
-    }
-  end
-
-  @doc """
   Gets Cloudflare configuration from environment variables.
   """
   def cloudflare_config do
@@ -160,19 +140,6 @@ defmodule Offtherecord.Config.Settings do
   end
 
   @doc """
-  Determines SMS provider based on available configuration.
-  """
-  def sms_provider do
-    sms = sms_config()
-
-    if sms.account_sid && sms.auth_token do
-      :twilio
-    else
-      :test
-    end
-  end
-
-  @doc """
   Checks if Cloudflare is configured.
   """
   def cloudflare_configured? do
@@ -197,14 +164,16 @@ defmodule Offtherecord.Config.Settings do
     web = web_config()
 
     # Environment-specific base URL logic
-    base_url = case Env.prod?() do
-      true ->
-        # Production: use configured host (offtherecord.im)
-        "https://#{web.host}"
-      false ->
-        # Development/Test: use localhost with port
-        "http://localhost:#{web.port}"
-    end
+    base_url =
+      case Env.prod?() do
+        true ->
+          # Production: use configured host (offtherecord.im)
+          "https://#{web.host}"
+
+        false ->
+          # Development/Test: use localhost with port
+          "http://localhost:#{web.port}"
+      end
 
     redirect_uri = "#{base_url}/auth/user/#{provider}/callback"
 
@@ -255,11 +224,6 @@ defmodule Offtherecord.Config.Settings do
     # Warn about Cloudflare
     unless cloudflare_configured?() do
       IO.warn("Cloudflare Images not configured - image uploads may not work")
-    end
-
-    # Warn about SMS
-    if sms_provider() == :test do
-      IO.warn("Twilio SMS not configured - using test SMS provider")
     end
   end
 end

@@ -45,7 +45,7 @@ defmodule Offtherecord.Accounts.User do
     end
 
     update :update do
-      accept [:email, :name, :picture, :phone_number]
+      accept [:email, :name, :picture]
     end
 
     # https://hexdocs.pm/ash_authentication/google.html
@@ -68,28 +68,11 @@ defmodule Offtherecord.Accounts.User do
         |> Ash.Changeset.change_attribute(:picture, user_info["picture"])
       end
     end
-
-    # SMS Phone authentication actions
-    create :register_with_phone do
-      argument :phone_number, :string, allow_nil?: false
-
-      accept [:phone_number, :name]
-      upsert? true
-      upsert_identity :unique_phone_number
-
-      change fn changeset, _ctx ->
-        phone_number = Ash.Changeset.get_argument(changeset, :phone_number)
-
-        changeset
-        |> Ash.Changeset.change_attribute(:phone_number, phone_number)
-      end
-    end
   end
 
   attributes do
     uuid_primary_key :id
     attribute :email, :ci_string, allow_nil?: true, public?: true
-    attribute :phone_number, :string, public?: true
     attribute :name, :string, public?: true
     attribute :picture, :string, public?: true
     timestamps()
@@ -103,6 +86,5 @@ defmodule Offtherecord.Accounts.User do
 
   identities do
     identity :unique_email, [:email]
-    identity :unique_phone_number, [:phone_number]
   end
 end

@@ -1,11 +1,16 @@
-defmodule Offtherecord.Repo.Migrations.CreateSmsVerificationsTable do
+defmodule Offtherecord.Repo.Migrations.DropSmsVerificationsTable do
   @moduledoc """
-  Creates the sms_verifications table for SMS authentication.
+  Drops the sms_verifications table as SMS authentication is being removed.
   """
 
   use Ecto.Migration
 
   def up do
+    drop table(:sms_verifications)
+  end
+
+  def down do
+    # Recreate the table if rollback is needed
     create table(:sms_verifications, primary_key: false) do
       add :id, :binary_id, primary_key: true, default: fragment("uuid_generate_v7()")
       add :phone_number, :string, null: false
@@ -20,9 +25,5 @@ defmodule Offtherecord.Repo.Migrations.CreateSmsVerificationsTable do
     create index(:sms_verifications, [:phone_number])
     create index(:sms_verifications, [:code])
     create index(:sms_verifications, [:expires_at])
-  end
-
-  def down do
-    drop table(:sms_verifications)
   end
 end
