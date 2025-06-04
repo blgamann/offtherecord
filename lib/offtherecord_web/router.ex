@@ -45,6 +45,7 @@ defmodule OfftherecordWeb.Router do
     pipe_through [:browser, :authenticated]
 
     live "/", PostsLive, :index
+    live "/chat", ChatLive, :index
   end
 
   # routes for mobile/external access

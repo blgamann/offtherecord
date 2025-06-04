@@ -32,6 +32,30 @@ defmodule OfftherecordWeb.Components.Layout do
             </div>
           </div>
           
+    <!-- Navigation -->
+          <div class="flex items-center space-x-6">
+            <.link
+              navigate="/"
+              class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              기록
+            </.link>
+            <.link
+              navigate="/chat"
+              class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.013 8.013 0 01-7-4c0-4.418 3.582-8 8-8s8 3.582 8 8z"
+                />
+              </svg>
+              <span>AI 채팅</span>
+            </.link>
+          </div>
+          
     <!-- User Info -->
           <.user_info current_user={@current_user} />
         </div>

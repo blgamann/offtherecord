@@ -70,6 +70,9 @@ config :offtherecord,
   ecto_repos: [Offtherecord.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+# Configure Postgres types for vector support
+config :offtherecord, Offtherecord.Repo, types: Offtherecord.PostgreTypes
+
 # Configures the endpoint
 config :offtherecord, OfftherecordWeb.Endpoint,
   url: [host: "localhost"],
