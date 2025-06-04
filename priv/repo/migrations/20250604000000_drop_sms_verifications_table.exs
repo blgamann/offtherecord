@@ -6,7 +6,7 @@ defmodule Offtherecord.Repo.Migrations.DropSmsVerificationsTable do
   use Ecto.Migration
 
   def up do
-    drop table(:sms_verifications)
+    drop_if_exists table(:sms_verifications)
   end
 
   def down do
