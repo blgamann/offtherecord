@@ -1,13 +1,14 @@
 defmodule OfftherecordWeb.Components.Posts do
   @moduledoc """
   Post-related components for the Off the Record application.
+  Designed with Medium-inspired clean aesthetics with subtle confidential touches.
   """
   use OfftherecordWeb, :verified_routes
   use Phoenix.Component
   import OfftherecordWeb.Components.UI
 
   @doc """
-  Renders a form for creating new posts.
+  Renders a clean, Medium-style form for creating new posts.
   """
   attr :form, :map, required: true
   attr :uploading, :boolean, default: false
@@ -18,21 +19,26 @@ defmodule OfftherecordWeb.Components.Posts do
 
   def post_form(assigns) do
     ~H"""
-    <.card class="p-8 mb-10">
+    <.clean_card class="p-8 mb-12 max-w-3xl mx-auto">
       <form phx-submit="create_post" phx-change="validate_post" class="space-y-6" novalidate>
+        <!-- Content field -->
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-3">
+            What's on your mind?
+          </label>
+
           <textarea
             name="content"
-            placeholder="오늘 어떤 일이 있었나요? 자유롭게 기록해보세요..."
-            class="w-full border-none outline-none text-lg leading-relaxed bg-transparent resize-none placeholder:text-slate-400 min-h-[120px] focus:ring-0"
+            placeholder="Share your thoughts, experiences, or ideas..."
+            class="w-full bg-white border border-gray-200 rounded-lg p-4 text-gray-900 placeholder:text-gray-500 focus:border-gray-400 focus:ring-0 focus:outline-none resize-none transition-colors duration-200 text-lg leading-relaxed min-h-[160px]"
           ><%= @form[:content].value %></textarea>
         </div>
         
     <!-- Upload Error Display -->
         <%= if @upload_error do %>
-          <div class="rounded-md bg-red-50 p-4 mb-4">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
             <div class="flex items-center">
-              <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fill-rule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -43,65 +49,46 @@ defmodule OfftherecordWeb.Components.Posts do
               <button
                 type="button"
                 phx-click="reset_upload"
-                class="ml-auto text-red-600 hover:text-red-800 text-sm underline"
+                class="ml-auto text-red-600 hover:text-red-800 text-sm font-medium"
               >
-                재시도
+                Try again
               </button>
             </div>
           </div>
         <% end %>
         
     <!-- Image Upload Section -->
-        <div class="border-t border-slate-200 pt-6">
+        <div>
+          <.divider class="mb-6" />
+
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-medium text-slate-700">이미지 첨부</h3>
+            <h3 class="text-sm font-medium text-gray-700">Add an image</h3>
             <%= if @uploading do %>
-              <span class="text-sm text-blue-600 flex items-center">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                업로드 중...
-              </span>
+              <div class="flex items-center space-x-2 text-gray-500">
+                <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent">
+                </div>
+                <span class="text-sm">Uploading...</span>
+              </div>
             <% end %>
           </div>
-          
-    <!-- Uploading State -->
-          <%= if @uploading and @selected_file_info do %>
-            <div class="mb-4">
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex items-center">
-                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-4">
-                  </div>
-                  <div class="flex-1">
-                    <h4 class="text-sm font-medium text-blue-900">업로드 중...</h4>
-                    <p class="text-sm text-blue-700">{@selected_file_info.name}</p>
-                    <p class="text-xs text-blue-600">
-                      크기: {format_file_size(@selected_file_info.size)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          <% end %>
           
     <!-- Image Preview -->
           <%= if @preview_image_url || @uploaded_image_url do %>
             <div class="mb-4">
-              <div class="relative inline-block">
+              <div class="relative inline-block rounded-lg overflow-hidden border border-gray-200">
                 <img
                   src={@uploaded_image_url || @preview_image_url}
-                  alt="이미지 미리보기"
-                  class="max-w-md rounded-lg shadow-sm max-h-64 object-cover"
+                  alt="Upload preview"
+                  class="max-w-full max-h-80 object-cover"
                 />
                 
     <!-- Upload overlay -->
                 <%= if @uploading do %>
-                  <div class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                  <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                     <div class="text-center text-white">
                       <div class="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2">
                       </div>
-                      <p class="text-sm font-medium">업로드 중...</p>
-                      <%= if @selected_file_info do %>
-                        <p class="text-xs opacity-80">{@selected_file_info.name}</p>
-                      <% end %>
+                      <p class="text-sm font-medium">Uploading...</p>
                     </div>
                   </div>
                 <% end %>
@@ -111,10 +98,10 @@ defmodule OfftherecordWeb.Components.Posts do
                   <button
                     type="button"
                     phx-click="remove_uploaded_image"
-                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-                    title="이미지 제거"
+                    class="absolute top-2 right-2 bg-gray-900 bg-opacity-80 text-white rounded-full p-2 hover:bg-opacity-100 transition-opacity"
+                    title="Remove image"
                   >
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -128,91 +115,96 @@ defmodule OfftherecordWeb.Components.Posts do
               
     <!-- Status message -->
               <%= if @uploaded_image_url && !@uploading do %>
-                <p class="text-sm text-green-600 mt-2">✓ 이미지가 준비되었습니다</p>
-              <% else %>
-                <%= if @uploading do %>
-                  <p class="text-sm text-blue-600 mt-2 flex items-center">
-                    <div class="animate-pulse w-2 h-2 bg-blue-600 rounded-full mr-2"></div>
-                    Cloudflare에 업로드 중...
-                  </p>
-                <% end %>
+                <p class="text-sm text-green-600 mt-2 flex items-center">
+                  <.indicator_dot variant="green" class="mr-2" /> Image ready to publish
+                </p>
               <% end %>
             </div>
           <% end %>
           
     <!-- File Upload Input -->
           <%= if !@preview_image_url && !@uploaded_image_url && !@upload_error do %>
-            <div class="space-y-4">
-              <div class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-slate-400 transition-colors">
-                <svg
-                  class="mx-auto h-12 w-12 text-slate-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                <div class="mt-4">
-                  <label for="manual-file-input" class="cursor-pointer">
-                    <span class="mt-2 block text-sm font-medium text-slate-900">
-                      이미지를 클릭하여 선택하세요
-                    </span>
-                    <span class="mt-1 block text-xs text-slate-500">
-                      PNG, JPG, GIF 최대 10MB
-                    </span>
-                  </label>
-                  <input
-                    type="file"
-                    id="manual-file-input"
-                    accept=".jpg,.jpeg,.png,.gif,.webp"
-                    class="sr-only"
-                    phx-hook="ManualFileUpload"
-                  />
-                </div>
+            <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-gray-300 transition-colors">
+              <svg
+                class="mx-auto h-10 w-10 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+              <div class="mt-4">
+                <label for="manual-file-input" class="cursor-pointer">
+                  <span class="text-sm font-medium text-gray-900">
+                    Click to upload an image
+                  </span>
+                  <span class="block text-xs text-gray-500 mt-1">
+                    PNG, JPG, GIF up to 10MB
+                  </span>
+                </label>
+                <input
+                  type="file"
+                  id="manual-file-input"
+                  accept=".jpg,.jpeg,.png,.gif,.webp"
+                  class="sr-only"
+                  phx-hook="ManualFileUpload"
+                />
               </div>
             </div>
           <% end %>
         </div>
-
+        
+    <!-- Submit button -->
         <input type="hidden" name="image_url" value={@uploaded_image_url || ""} />
-        <div class="flex justify-end">
-          <.gradient_button type="submit" disabled={@uploading}>
+        <div class="flex justify-end pt-4">
+          <.clean_button type="submit" variant="primary" disabled={@uploading}>
             <%= if @uploading do %>
-              이미지 업로드 중...
+              Publishing...
             <% else %>
-              기록 추가
+              Publish
             <% end %>
-          </.gradient_button>
+          </.clean_button>
         </div>
       </form>
-    </.card>
+    </.clean_card>
     """
   end
 
   @doc """
-  Renders the posts timeline with date grouping.
+  Renders the posts timeline with clean, Medium-style layout.
   """
   attr :posts, :list, required: true
   attr :modal_image_url, :string, default: nil
   attr :show_modal, :boolean, default: false
 
   def posts_timeline(assigns) do
+    # 시간순으로 정렬해서 넘버링용 인덱스 맵 생성
+    posts_with_numbers =
+      assigns.posts
+      # 오래된 순으로 정렬
+      |> Enum.sort_by(& &1.created_at, {:asc, DateTime})
+      # 1부터 시작하는 인덱스
+      |> Enum.with_index(1)
+      |> Enum.into(%{}, fn {post, index} -> {post.id, index} end)
+
+    assigns = assign(assigns, :posts_with_numbers, posts_with_numbers)
+
     ~H"""
     <div class="space-y-12">
       <%= if length(@posts) == 0 do %>
-        <.empty_state
-          icon="📝"
-          title="아직 기록이 없습니다"
-          description="첫 번째 기록을 작성해보세요!"
+        <.clean_empty_state
+          icon="✍️"
+          title="No posts yet"
+          description="Start documenting your thoughts and experiences. Your personal archive awaits your first entry."
         />
       <% else %>
         <%= for {date, date_posts} <- group_posts_by_date(@posts) do %>
-          <.date_group date={date} posts={date_posts} />
+          <.date_section date={date} posts={date_posts} posts_with_numbers={@posts_with_numbers} />
         <% end %>
       <% end %>
 
@@ -222,22 +214,23 @@ defmodule OfftherecordWeb.Components.Posts do
   end
 
   @doc """
-  Renders a group of posts for a specific date.
+  Renders a date section with posts.
   """
   attr :date, :string, required: true
   attr :posts, :list, required: true
+  attr :posts_with_numbers, :map, required: true
 
-  def date_group(assigns) do
+  def date_section(assigns) do
     ~H"""
-    <div class="space-y-6">
+    <section class="space-y-6">
       <.date_header date={@date} count={length(@posts)} />
-      <.posts_grid posts={@posts} />
-    </div>
+      <.posts_grid posts={@posts} posts_with_numbers={@posts_with_numbers} />
+    </section>
     """
   end
 
   @doc """
-  Renders the date header with post count.
+  Renders the date header with clean typography.
   """
   attr :date, :string, required: true
   attr :count, :integer, required: true
@@ -245,12 +238,12 @@ defmodule OfftherecordWeb.Components.Posts do
   def date_header(assigns) do
     ~H"""
     <div class="flex items-center justify-between">
-      <.badge>
+      <.subtle_badge variant="default">
         {@date}
-      </.badge>
-      <div class="text-slate-500 text-sm font-medium">
-        {@count}개의 기록
-      </div>
+      </.subtle_badge>
+      <span class="text-sm text-gray-500 font-medium">
+        {@count} {if @count == 1, do: "entry", else: "entries"}
+      </span>
     </div>
     """
   end
@@ -259,6 +252,7 @@ defmodule OfftherecordWeb.Components.Posts do
   Renders a horizontal scrollable grid of post cards.
   """
   attr :posts, :list, required: true
+  attr :posts_with_numbers, :map, required: true
 
   def posts_grid(assigns) do
     ~H"""
@@ -267,10 +261,10 @@ defmodule OfftherecordWeb.Components.Posts do
       class="horizontal-scroll-container overflow-x-auto"
       phx-hook="HorizontalScroll"
     >
-      <div class="flex gap-5 pb-4" style="width: max-content;">
+      <div class="flex gap-6 pb-4" style="width: max-content;">
         <%= for post <- @posts do %>
           <div class="flex-none w-80 md:w-80 sm:w-72">
-            <.post_card post={post} />
+            <.story_card post={post} post_number={@posts_with_numbers[post.id]} />
           </div>
         <% end %>
       </div>
@@ -279,112 +273,81 @@ defmodule OfftherecordWeb.Components.Posts do
   end
 
   @doc """
-  Renders an individual post card.
+  Renders an individual story card (keeping your preferred card design but with cleaner styling).
   """
   attr :post, :map, required: true
+  attr :post_number, :integer, required: true
 
-  def post_card(assigns) do
+  def story_card(assigns) do
     ~H"""
-    <div class="flex flex-col space-y-1">
-      <div class="group relative bg-slate-50 border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300 min-h-[100px] flex">
-        <.post_sidebar number={generate_record_number(@post.id)} />
-        <.post_content post={@post} />
+    <div class="flex flex-col space-y-2">
+      <div class="group relative bg-white border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 min-h-[120px] flex rounded-lg">
+        <.story_number number={@post_number} />
+        <.story_content post={@post} />
       </div>
-      <.post_time time={format_date(@post.created_at)} />
+      <.story_timestamp time={format_date(@post.created_at)} />
     </div>
     """
   end
 
   @doc """
-  Renders the sidebar with record number.
+  Renders the story number tab.
   """
-  attr :number, :string, required: true
+  attr :number, :integer, required: true
 
-  def post_sidebar(assigns) do
+  def story_number(assigns) do
     ~H"""
-    <div class="bg-slate-800 w-10 flex items-center justify-center">
-      <span class="text-white text-xs font-medium transform rotate-90">
-        {@number}
+    <div class="bg-gray-800 w-12 flex items-center justify-center rounded-l-lg">
+      <span class="text-white text-xs font-medium transform rotate-90 font-mono">
+        {String.pad_leading("#{@number}", 3, "0")}
       </span>
     </div>
     """
   end
 
   @doc """
-  Renders the main content area of a post.
+  Renders the main content area of a story.
   """
   attr :post, :map, required: true
 
-  def post_content(assigns) do
+  def story_content(assigns) do
     ~H"""
-    <div class="flex-1 p-4 pt-3 bg-white flex flex-col">
-      <!-- 작성자 정보 -->
-      <%= if @post.user do %>
-        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
-          <%= if @post.user.picture do %>
-            <img src={@post.user.picture} alt="프로필" class="w-6 h-6 rounded-full" />
-          <% else %>
-            <div class="w-6 h-6 rounded-full bg-slate-300 flex items-center justify-center">
-              <span class="text-xs text-slate-600">👤</span>
-            </div>
-          <% end %>
-          <span class="text-xs text-slate-600 font-medium">
-            {display_user_name(@post.user)}
-          </span>
-        </div>
-      <% end %>
-
-      <%= if @post.image_url && @post.image_url != "" do %>
-        <div class="mb-2">
-          <img
-            src={@post.image_url}
-            alt="포스트 이미지"
-            class="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
-            phx-click="show_image_modal"
-            phx-value-image-url={@post.image_url}
-          />
-        </div>
-      <% end %>
-
+    <div class="flex-1 p-4 bg-white flex flex-col">
+      <!-- Text content -->
       <div
-        class="text-slate-800 text-sm leading-relaxed"
+        class="text-gray-800 text-sm leading-relaxed flex-1"
         phx-hook="FixWhitespace"
         id={"post-content-#{@post.id}"}
       >
         {format_post_content(@post.content)}
       </div>
+      
+    <!-- Image at bottom -->
+      <%= if @post.image_url && @post.image_url != "" do %>
+        <div class="mt-3">
+          <img
+            src={@post.image_url}
+            alt="Story image"
+            class="w-full h-32 object-cover rounded cursor-pointer hover:opacity-95 transition-opacity"
+            phx-click="show_image_modal"
+            phx-value-image-url={@post.image_url}
+          />
+        </div>
+      <% end %>
     </div>
     """
   end
 
   @doc """
-  Renders the post timestamp.
+  Renders the story timestamp.
   """
   attr :time, :string, required: true
 
-  def post_time(assigns) do
+  def story_timestamp(assigns) do
     ~H"""
-    <div class="text-right text-slate-400 text-xs pr-2">
+    <div class="text-right text-gray-400 text-xs pr-2 font-mono">
       {@time}
     </div>
-    """
-  end
-
-  @doc """
-  Renders a delete button for posts.
-  """
-  attr :post_id, :string, required: true
-
-  def delete_button(assigns) do
-    ~H"""
-    <button
-      phx-click="delete_post"
-      phx-value-id={@post_id}
-      data-confirm="이 기록을 삭제하시겠습니까?"
-      class="absolute top-2.5 right-2.5 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
-    >
-      ×
-    </button>
     """
   end
 
@@ -406,9 +369,9 @@ defmodule OfftherecordWeb.Components.Posts do
         <div class="relative max-w-4xl max-h-full">
           <button
             phx-click="hide_image_modal"
-            class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all z-10"
+            class="absolute top-4 right-4 bg-white bg-opacity-90 text-gray-900 rounded-full p-2 hover:bg-opacity-100 transition-all z-10 shadow-lg"
           >
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -419,8 +382,8 @@ defmodule OfftherecordWeb.Components.Posts do
           </button>
           <img
             src={@image_url}
-            alt="원본 이미지"
-            class="max-w-full max-h-full object-contain rounded"
+            alt="Full size image"
+            class="max-w-full max-h-full object-contain rounded-lg"
             phx-click-away="hide_image_modal"
           />
         </div>
@@ -444,20 +407,16 @@ defmodule OfftherecordWeb.Components.Posts do
   defp format_date_full(date) do
     case DateTime.shift_zone(date, "Asia/Seoul") do
       {:ok, shifted_date} ->
-        year = shifted_date.year
-        month = shifted_date.month
-        day = shifted_date.day
-        "#{year}년 #{month}월 #{day}일"
+        shifted_date
+        |> Calendar.strftime("%B %d, %Y")
 
       {:error, _} ->
         seconds_since_epoch = DateTime.to_unix(date)
         seoul_seconds = seconds_since_epoch + 9 * 60 * 60
         shifted_date = DateTime.from_unix!(seoul_seconds)
 
-        year = shifted_date.year
-        month = shifted_date.month
-        day = shifted_date.day
-        "#{year}년 #{month}월 #{day}일"
+        shifted_date
+        |> Calendar.strftime("%B %d, %Y")
     end
   end
 
@@ -478,14 +437,6 @@ defmodule OfftherecordWeb.Components.Posts do
         |> Time.to_string()
         |> String.slice(0, 5)
     end
-  end
-
-  defp generate_record_number(post_id) do
-    :crypto.hash(:md5, post_id)
-    |> :binary.decode_unsigned()
-    |> rem(1000)
-    |> Integer.to_string()
-    |> String.pad_leading(3, "0")
   end
 
   defp format_file_size(bytes) when bytes < 1024, do: "#{bytes} B"
@@ -514,13 +465,4 @@ defmodule OfftherecordWeb.Components.Posts do
   end
 
   defp format_post_content(_), do: ""
-
-  # 사용자 이름 표시 헬퍼
-  defp display_user_name(user) do
-    cond do
-      user.name && String.trim(user.name) != "" -> user.name
-      user.email -> user.email
-      true -> "익명 사용자"
-    end
-  end
 end

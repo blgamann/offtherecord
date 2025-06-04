@@ -9,45 +9,31 @@ defmodule OfftherecordWeb.AuthLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <!-- Animated background elements -->
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob">
-        </div>
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000">
-        </div>
-        <div class="absolute -bottom-40 left-20 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000">
-        </div>
-      </div>
-
-      <div class="relative z-10 max-w-md w-full space-y-8 p-8">
-        <!-- Glass morphism card -->
-        <div class="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl">
-          <!-- Logo or brand -->
-          <div class="text-center mb-8">
-            <div class="mx-auto h-16 w-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-4">
-              <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+    <div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div class="max-w-md w-full">
+        <!-- Main auth card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <!-- Header -->
+          <div class="px-8 pt-8 pb-6 text-center">
+            <div class="w-12 h-12 bg-gray-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+              <div class="w-5 h-5 bg-white rounded-full opacity-90"></div>
             </div>
-            <h2 class="text-3xl font-bold text-white">
-              Welcome back
-            </h2>
-            <p class="mt-2 text-sm text-gray-300">
-              Sign in to continue to your account
+
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">
+              Welcome to Off the Record
+            </h1>
+
+            <p class="text-gray-600 leading-relaxed">
+              Sign in to access your personal archive of thoughts and memories.
             </p>
           </div>
           
-    <!-- Google Sign-in Button -->
-          <div class="space-y-4">
+    <!-- Auth content -->
+          <div class="px-8 pb-8">
+            <!-- Google Sign-in -->
             <a
               href={~p"/auth/user/google"}
-              class="group relative w-full flex justify-center items-center py-4 px-6 border border-white/20 text-sm font-medium rounded-xl text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg backdrop-blur-sm"
+              class="w-full flex items-center justify-center px-6 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group"
             >
               <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
                 <path
@@ -67,9 +53,9 @@ defmodule OfftherecordWeb.AuthLive do
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span class="text-white font-medium">Continue with Google</span>
+              Continue with Google
               <svg
-                class="ml-3 w-4 h-4 text-white/70 group-hover:text-white transition-colors duration-200"
+                class="w-4 h-4 ml-auto text-gray-400 group-hover:text-gray-600 transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -83,60 +69,43 @@ defmodule OfftherecordWeb.AuthLive do
               </svg>
             </a>
             
-    <!-- Additional features or links -->
-            <div class="text-center">
-              <p class="text-xs text-gray-400">
-                By signing in, you agree to our
-                <a href="#" class="text-purple-400 hover:text-purple-300 transition-colors">
-                  Terms of Service
-                </a>
-                and
-                <a href="#" class="text-purple-400 hover:text-purple-300 transition-colors">
-                  Privacy Policy
-                </a>
-              </p>
+    <!-- Privacy note -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div class="flex items-start space-x-3">
+                <svg
+                  class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900 mb-1">
+                    Private & Secure
+                  </h3>
+                  <p class="text-xs text-gray-600 leading-relaxed">
+                    Your thoughts remain private. We only use your Google account for secure authentication.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
-    <!-- Bottom text -->
-        <div class="text-center">
-          <p class="text-sm text-gray-400">
-            Don't have an account?
-            <span class="text-purple-400 font-medium">Get started for free</span>
+    <!-- Footer -->
+        <div class="text-center mt-6">
+          <p class="text-xs text-gray-500">
+            By signing in, you agree to our privacy practices.
           </p>
         </div>
       </div>
     </div>
-
-    <style>
-      @keyframes blob {
-        0% {
-          transform: translate(0px, 0px) scale(1);
-        }
-        33% {
-          transform: translate(30px, -50px) scale(1.1);
-        }
-        66% {
-          transform: translate(-20px, 20px) scale(0.9);
-        }
-        100% {
-          transform: translate(0px, 0px) scale(1);
-        }
-      }
-
-      .animate-blob {
-        animation: blob 7s infinite;
-      }
-
-      .animation-delay-2000 {
-        animation-delay: 2s;
-      }
-
-      .animation-delay-4000 {
-        animation-delay: 4s;
-      }
-    </style>
     """
   end
 end
