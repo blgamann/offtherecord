@@ -125,6 +125,12 @@ config :phoenix, :json_library, Jason
 # Configure timezone database
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
+# Configure Oban
+config :offtherecord, Oban,
+  repo: Offtherecord.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [default: 10, embeddings: 5]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

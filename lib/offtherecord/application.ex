@@ -10,6 +10,7 @@ defmodule Offtherecord.Application do
     children = [
       OfftherecordWeb.Telemetry,
       Offtherecord.Repo,
+      {Oban, Application.fetch_env!(:offtherecord, Oban)},
       {DNSCluster, query: Application.get_env(:offtherecord, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Offtherecord.PubSub},
       # Start the Finch HTTP client for sending emails
