@@ -73,6 +73,13 @@ IO.puts("========================")
 # Configure AshAuthentication
 config :offtherecord, AshAuthentication, signing_secret: auth_config.token_signing_secret
 
+# Configure database for all environments
+config :offtherecord, Offtherecord.Repo,
+  url: db_config.url,
+  pool_size: db_config.pool_size,
+  stacktrace: config_env() == :dev,
+  show_sensitive_data_on_connection_error: config_env() == :dev
+
 # Enable Phoenix server if requested
 if web_config.server do
   config :offtherecord, OfftherecordWeb.Endpoint, server: true

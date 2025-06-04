@@ -1,14 +1,8 @@
 import Config
 
-# Configure your database
-config :offtherecord, Offtherecord.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "offtherecord_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+# Database configuration is now handled in config/runtime.exs
+# This allows using environment variables for both dev and prod
+# To use Supabase in development, set DATABASE_URL in your .env file
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
