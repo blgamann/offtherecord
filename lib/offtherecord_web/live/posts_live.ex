@@ -3,11 +3,9 @@ defmodule OfftherecordWeb.PostsLive do
   use OfftherecordWeb, :verified_routes
   alias Offtherecord.Record.Post
 
-  import OfftherecordWeb.Components.UI
   import OfftherecordWeb.Components.Posts
   import OfftherecordWeb.Components.Layout
   import Plug.CSRFProtection, only: [get_csrf_token: 0]
-  import Phoenix.HTML.Form, only: [to_form: 1]
 
   on_mount {OfftherecordWeb.UserAuth, :ensure_authenticated}
 
@@ -32,6 +30,8 @@ defmodule OfftherecordWeb.PostsLive do
       # 이미지 모달 상태
       |> assign(:show_modal, false)
       |> assign(:modal_image_url, nil)
+      # 포스트 작성 모달 상태
+      |> assign(:show_compose_modal, false)
 
     {:ok, socket}
   end
@@ -79,6 +79,7 @@ defmodule OfftherecordWeb.PostsLive do
               |> assign(:preview_image_url, nil)
               |> assign(:selected_file_info, nil)
               |> assign(:upload_error, nil)
+              |> assign(:show_compose_modal, false)
               |> put_flash(:info, "포스트가 성공적으로 생성되었습니다!")
 
             {:noreply, socket}
@@ -227,6 +228,33 @@ defmodule OfftherecordWeb.PostsLive do
   end
 
   @impl true
+  def handle_event("open_compose_modal", _params, socket) do
+    socket =
+      socket
+      |> assign(:show_compose_modal, true)
+      |> assign(:form, to_form(%{"content" => "", "image_url" => ""}))
+      |> assign(:uploaded_image_url, nil)
+      |> assign(:preview_image_url, nil)
+      |> assign(:selected_file_info, nil)
+      |> assign(:upload_error, nil)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("close_compose_modal", _params, socket) do
+    socket =
+      socket
+      |> assign(:show_compose_modal, false)
+      |> assign(:uploaded_image_url, nil)
+      |> assign(:preview_image_url, nil)
+      |> assign(:selected_file_info, nil)
+      |> assign(:upload_error, nil)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("show_image_modal", %{"image-url" => image_url}, socket) do
     socket =
       socket
@@ -320,20 +348,24 @@ defmodule OfftherecordWeb.PostsLive do
           <.page_header current_user={@current_user} />
 
           <.content_container>
-            <.post_form
-              form={@form}
-              uploading={@uploading}
-              uploaded_image_url={@uploaded_image_url}
-              preview_image_url={@preview_image_url}
-              selected_file_info={@selected_file_info}
-              upload_error={@upload_error}
-            />
+            <.compose_button current_user={@current_user} />
             <.posts_timeline
               posts={@posts}
               show_modal={@show_modal}
               modal_image_url={@modal_image_url}
             />
           </.content_container>
+
+          <.compose_modal
+            show={@show_compose_modal}
+            form={@form}
+            uploading={@uploading}
+            uploaded_image_url={@uploaded_image_url}
+            preview_image_url={@preview_image_url}
+            selected_file_info={@selected_file_info}
+            upload_error={@upload_error}
+            current_user={@current_user}
+          />
         </.app_container>
       </body>
     </html>

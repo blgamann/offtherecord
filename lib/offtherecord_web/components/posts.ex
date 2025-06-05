@@ -8,8 +8,213 @@ defmodule OfftherecordWeb.Components.Posts do
   import OfftherecordWeb.Components.UI
 
   @doc """
-  Renders a clean, Medium-style form for creating new posts.
+  Renders a Facebook-style compose button that opens a modal.
   """
+  attr :current_user, :map, required: true
+
+  def compose_button(assigns) do
+    ~H"""
+    <div class="max-w-3xl mx-auto mb-6">
+      <.clean_card class="p-4">
+        <button
+          phx-click="open_compose_modal"
+          class="w-full flex items-center space-x-3 p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-full border border-gray-200 transition-colors duration-200"
+        >
+          <.user_avatar user={@current_user} size="w-10 h-10" />
+          <span class="text-gray-500 text-lg">
+            {@current_user.name || @current_user.email}님, 무슨 생각을 하고 계신가요?
+          </span>
+        </button>
+      </.clean_card>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a modal for composing new posts.
+  """
+  attr :show, :boolean, required: true
+  attr :form, :map, required: true
+  attr :uploading, :boolean, default: false
+  attr :uploaded_image_url, :string, default: nil
+  attr :preview_image_url, :string, default: nil
+  attr :selected_file_info, :map, default: nil
+  attr :upload_error, :string, default: nil
+  attr :current_user, :map, required: true
+
+  def compose_modal(assigns) do
+    ~H"""
+    <%= if @show do %>
+      <div
+        id="compose-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        phx-click-away="close_compose_modal"
+      >
+        <div
+          class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+          phx-click-away="ignore"
+        >
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">포스트 작성</h2>
+            <button
+              phx-click="close_compose_modal"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          
+    <!-- Modal Content -->
+          <form phx-submit="create_post" phx-change="validate_post" class="p-4 space-y-4" novalidate>
+            <!-- User info -->
+            <div class="flex items-center space-x-3">
+              <.user_avatar user={@current_user} size="w-10 h-10" />
+              <span class="font-medium text-gray-900">
+                {@current_user.name || @current_user.email}
+              </span>
+            </div>
+            
+    <!-- Content textarea -->
+            <div>
+              <textarea
+                name="content"
+                placeholder="무슨 생각을 하고 계신가요?"
+                class="w-full bg-white border-0 focus:ring-0 focus:outline-none resize-none text-gray-900 placeholder:text-gray-500 text-lg leading-relaxed min-h-[120px]"
+                autofocus
+              ><%= @form[:content].value %></textarea>
+            </div>
+            
+    <!-- Upload Error Display -->
+            <%= if @upload_error do %>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <p class="text-sm text-red-800">{@upload_error}</p>
+                  <button
+                    type="button"
+                    phx-click="reset_upload"
+                    class="ml-auto text-red-600 hover:text-red-800 text-sm font-medium"
+                  >
+                    다시 시도
+                  </button>
+                </div>
+              </div>
+            <% end %>
+            
+    <!-- Image Preview -->
+            <%= if @preview_image_url || @uploaded_image_url do %>
+              <div class="relative">
+                <img
+                  src={@uploaded_image_url || @preview_image_url}
+                  alt="Upload preview"
+                  class="w-full max-h-80 object-cover rounded-lg"
+                />
+                
+    <!-- Upload overlay -->
+                <%= if @uploading do %>
+                  <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-lg">
+                    <div class="text-center text-white">
+                      <div class="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2">
+                      </div>
+                      <p class="text-sm font-medium">업로드 중...</p>
+                    </div>
+                  </div>
+                <% end %>
+                
+    <!-- Remove button -->
+                <%= if @uploaded_image_url && !@uploading do %>
+                  <button
+                    type="button"
+                    phx-click="remove_uploaded_image"
+                    class="absolute top-2 right-2 bg-gray-900 bg-opacity-80 text-white rounded-full p-2 hover:bg-opacity-100 transition-opacity"
+                    title="이미지 제거"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                <% end %>
+              </div>
+            <% end %>
+            
+    <!-- Action buttons bar -->
+            <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+              <div class="flex items-center space-x-4">
+                <!-- Photo upload button -->
+                <%= if !@preview_image_url && !@uploaded_image_url && !@upload_error do %>
+                  <label
+                    for="modal-file-input"
+                    class="cursor-pointer flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span class="text-sm font-medium">사진</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="modal-file-input"
+                    accept=".jpg,.jpeg,.png,.gif,.webp"
+                    class="sr-only"
+                    phx-hook="ManualFileUpload"
+                  />
+                <% end %>
+              </div>
+              
+    <!-- Submit button -->
+              <input type="hidden" name="image_url" value={@uploaded_image_url || ""} />
+              <button
+                type="submit"
+                disabled={@uploading}
+                class={[
+                  "relative overflow-hidden transition-all duration-200 font-medium",
+                  if(@uploading,
+                    do: "bg-gray-300 text-gray-500 cursor-not-allowed",
+                    else: "bg-gray-900 hover:bg-gray-800 text-white hover:shadow-md active:scale-95"
+                  ),
+                  "px-4 py-2 rounded-lg text-sm"
+                ]}
+              >
+                <span class="relative z-10">
+                  <%= if @uploading do %>
+                    게시 중...
+                  <% else %>
+                    게시
+                  <% end %>
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    <% end %>
+    """
+  end
+
   attr :form, :map, required: true
   attr :uploading, :boolean, default: false
   attr :uploaded_image_url, :string, default: nil
