@@ -61,7 +61,7 @@ defmodule OfftherecordWeb.Router do
   scope "/api" do
     pipe_through :api_auth
 
-    forward "/json", AshJsonApi.Controllers.Router, domains: [Offtherecord.Record]
+    forward "/", AshJsonApi.Controllers.Router, domains: [Offtherecord.Record]
   end
 
   # GraphQL endpoint
@@ -86,5 +86,11 @@ defmodule OfftherecordWeb.Router do
       live_dashboard "/dashboard", metrics: OfftherecordWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+
+    forward "/api/swagger", OpenApiSpex.Plug.SwaggerUI,
+      path: "/api/open_api",
+      default_model_expand_depth: 4
+
+    forward "/api", OfftherecordWeb.AshJsonApiRouter
   end
 end
