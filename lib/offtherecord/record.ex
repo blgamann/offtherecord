@@ -3,5 +3,6 @@ defmodule Offtherecord.Record do
 
   resources do
     resource Offtherecord.Record.Post
+    resource Offtherecord.Record.Category
   end
 end

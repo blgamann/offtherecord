@@ -19,6 +19,7 @@ defmodule Offtherecord.Record.Post do
     mutations do
       create :create_post, :create
       update :update_post, :update
+      update :assign_post_category, :assign_category
       destroy :delete_post, :destroy
     end
   end
@@ -59,7 +60,7 @@ defmodule Offtherecord.Record.Post do
   end
 
   actions do
-    default_accept [:content, :date, :image_url]
+    default_accept [:content, :date, :image_url, :category_id]
     defaults [:update, :destroy]
 
     read :read do
@@ -68,7 +69,7 @@ defmodule Offtherecord.Record.Post do
     end
 
     create :create do
-      accept [:content, :date, :image_url]
+      accept [:content, :date, :image_url, :category_id]
 
       change fn changeset, context ->
         case context.actor do
@@ -114,6 +115,11 @@ defmodule Offtherecord.Record.Post do
       end
 
       pagination keyset?: true, required?: false
+    end
+
+    # Action to assign category to post
+    update :assign_category do
+      accept [:category_id]
     end
   end
 
@@ -164,6 +170,11 @@ defmodule Offtherecord.Record.Post do
       public? true
     end
 
+    attribute :category_id, :uuid do
+      allow_nil? true
+      public? true
+    end
+
     create_timestamp :created_at
     update_timestamp :updated_at
   end
@@ -171,6 +182,11 @@ defmodule Offtherecord.Record.Post do
   relationships do
     belongs_to :user, Offtherecord.Accounts.User do
       allow_nil? false
+      public? true
+    end
+
+    belongs_to :category, Offtherecord.Record.Category do
+      allow_nil? true
       public? true
     end
   end
