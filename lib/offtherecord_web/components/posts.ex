@@ -6,6 +6,7 @@ defmodule OfftherecordWeb.Components.Posts do
   use OfftherecordWeb, :verified_routes
   use Phoenix.Component
   import OfftherecordWeb.Components.UI
+  alias Phoenix.LiveView.JS
 
   @doc """
   Renders a Facebook-style compose button that opens a modal.
@@ -670,4 +671,175 @@ defmodule OfftherecordWeb.Components.Posts do
   end
 
   defp format_post_content(_), do: ""
+
+  @doc """
+  Renders a horizontal scrollable list of category filter buttons.
+  """
+  attr :categories, :list, default: []
+  attr :selected_category_id, :string, default: nil
+
+  def category_horizontal_list(assigns) do
+    ~H"""
+    <div class="w-full bg-white border-t border-gray-200">
+      <div class="max-w-3xl mx-auto px-4 py-3">
+        <div class="flex items-center space-x-3 overflow-x-auto scrollbar-hide">
+          <!-- 전체 버튼 -->
+          <button
+            phx-click="select_category"
+            phx-value-category-id=""
+            class={[
+              "flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200",
+              if(@selected_category_id == nil,
+                do: "bg-blue-600 text-white",
+                else: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              )
+            ]}
+          >
+            전체
+          </button>
+          
+    <!-- 기존 카테고리들 -->
+          <div :for={category <- @categories} class="flex-shrink-0">
+            <button
+              phx-click="select_category"
+              phx-value-category-id={category.id}
+              class={[
+                "px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200",
+                if(@selected_category_id == category.id,
+                  do: "bg-blue-600 text-white",
+                  else: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                )
+              ]}
+            >
+              {category.name}
+            </button>
+          </div>
+          
+    <!-- 새 카테고리 버튼 -->
+          <button
+            phx-click="open_create_category_modal"
+            class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 transition-colors duration-200"
+          >
+            + 새 카테고리
+          </button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a modal for selecting or creating categories for a post.
+  """
+  attr :show, :boolean, required: true
+  attr :categories, :list, default: []
+  attr :category_form, :map, default: %{}
+  attr :pending_post_id, :string, default: nil
+
+  def create_category_modal(assigns) do
+    ~H"""
+    <%= if @show do %>
+      <div
+        id="category-selection-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        phx-click="skip_category_assignment"
+        phx-key="Escape"
+        phx-window-keydown="skip_category_assignment"
+      >
+        <div
+          class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+          phx-click="category_modal_content_click"
+        >
+          <!-- 모달 헤더 -->
+          <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">카테고리 선택</h2>
+            <button
+              phx-click="skip_category_assignment"
+              class="text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          
+    <!-- 모달 컨텐츠 -->
+          <div class="p-6">
+            <p class="text-sm text-gray-600 mb-4">
+              포스트에 카테고리를 지정하면 나중에 쉽게 찾을 수 있습니다.
+            </p>
+            
+    <!-- 카테고리 없음 버튼 -->
+            <button
+              phx-click="assign_category_to_post"
+              phx-value-category-id=""
+              class="w-full mb-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+            >
+              <div class="flex items-center">
+                <span class="text-gray-500 mr-2">📝</span>
+                <span>카테고리 없음</span>
+              </div>
+            </button>
+            
+    <!-- 기존 카테고리들 -->
+            <div :for={category <- @categories} class="mb-2">
+              <button
+                phx-click="assign_category_to_post"
+                phx-value-category-id={category.id}
+                class="w-full p-3 text-left border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
+              >
+                <div class="flex items-center">
+                  <span class="text-blue-500 mr-2">🏷️</span>
+                  <span>{category.name}</span>
+                </div>
+              </button>
+            </div>
+            
+    <!-- 새 카테고리 생성 -->
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <form phx-submit="create_category" class="space-y-3">
+                <div>
+                  <label for="new_category_name" class="block text-sm font-medium text-gray-700 mb-1">
+                    새 카테고리 만들기
+                  </label>
+                  <input
+                    type="text"
+                    id="new_category_name"
+                    name="name"
+                    value={@category_form["name"] || ""}
+                    placeholder="카테고리 이름 입력..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    autocomplete="off"
+                    phx-debounce="200"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors duration-200"
+                >
+                  만들고 지정하기
+                </button>
+              </form>
+            </div>
+            
+    <!-- 건너뛰기 버튼 -->
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <button
+                phx-click="skip_category_assignment"
+                class="w-full px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200"
+              >
+                나중에 하기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    """
+  end
 end

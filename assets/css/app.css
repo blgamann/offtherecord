@@ -28,6 +28,16 @@
   text-indent: 0 !important;
 }
 
+/* 가로 스크롤바 숨기기 */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
 /* Horizontal scroll styling */
 .horizontal-scroll-container {
   scrollbar-width: thin;

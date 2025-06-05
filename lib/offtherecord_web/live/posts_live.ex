@@ -13,6 +13,7 @@ defmodule OfftherecordWeb.PostsLive do
   def mount(_params, _session, socket) do
     current_user = socket.assigns.current_user
     posts = list_posts(current_user)
+    categories = list_categories(current_user)
 
     IO.inspect(posts)
 
@@ -32,6 +33,12 @@ defmodule OfftherecordWeb.PostsLive do
       |> assign(:modal_image_url, nil)
       # 포스트 작성 모달 상태
       |> assign(:show_compose_modal, false)
+      # 카테고리 관련 상태
+      |> assign(:categories, categories)
+      |> assign(:selected_category_id, nil)
+      |> assign(:show_category_modal, false)
+      |> assign(:pending_post_id, nil)
+      |> assign(:category_form, %{})
 
     {:ok, socket}
   end
@@ -67,8 +74,9 @@ defmodule OfftherecordWeb.PostsLive do
                },
                socket.assigns.current_user
              ) do
-          {:ok, _post} ->
+          {:ok, post} ->
             posts = list_posts(socket.assigns.current_user)
+            categories = list_categories(socket.assigns.current_user)
 
             socket =
               socket
@@ -80,7 +88,12 @@ defmodule OfftherecordWeb.PostsLive do
               |> assign(:selected_file_info, nil)
               |> assign(:upload_error, nil)
               |> assign(:show_compose_modal, false)
-              |> put_flash(:info, "포스트가 성공적으로 생성되었습니다!")
+              # 카테고리 선택 모달 표시
+              |> assign(:show_category_modal, true)
+              |> assign(:pending_post_id, post.id)
+              |> assign(:categories, categories)
+              |> assign(:category_form, %{})
+              |> put_flash(:info, "포스트가 생성되었습니다! 카테고리를 선택해주세요.")
 
             {:noreply, socket}
 
@@ -203,6 +216,175 @@ defmodule OfftherecordWeb.PostsLive do
       |> assign(:uploading, false)
       |> assign(:preview_image_url, nil)
       |> assign(:upload_error, nil)
+
+    {:noreply, socket}
+  end
+
+  # 카테고리 선택 이벤트
+  @impl true
+  def handle_event("select_category", %{"category-id" => category_id}, socket) do
+    # 빈 문자열이면 nil로 변환 (전체 선택)
+    selected_category_id = if category_id == "", do: nil, else: category_id
+
+    # 포스트 필터링
+    all_posts = list_posts(socket.assigns.current_user)
+    filtered_posts = filter_posts_by_category(all_posts, selected_category_id)
+
+    socket =
+      socket
+      |> assign(:selected_category_id, selected_category_id)
+      |> assign(:posts, filtered_posts)
+      |> assign(:post_count, length(filtered_posts))
+
+    {:noreply, socket}
+  end
+
+  # 새 카테고리 생성 모달 열기
+  @impl true
+  def handle_event("open_create_category_modal", _params, socket) do
+    require Logger
+    Logger.info("=== OPEN CREATE CATEGORY MODAL ===")
+
+    socket =
+      socket
+      |> assign(:show_category_modal, true)
+      |> assign(:category_form, %{})
+      |> put_flash(:info, "새 카테고리 모달이 열렸습니다!")
+
+    Logger.info("Modal state set to: #{socket.assigns.show_category_modal}")
+    {:noreply, socket}
+  end
+
+  # 카테고리 생성 모달 닫기
+  @impl true
+  def handle_event("close_create_category_modal", _params, socket) do
+    socket =
+      socket
+      |> assign(:show_category_modal, false)
+      |> assign(:category_form, %{})
+
+    {:noreply, socket}
+  end
+
+  # 카테고리 생성
+  @impl true
+  def handle_event("create_category", %{"name" => name}, socket) do
+    case String.trim(name) do
+      "" ->
+        socket = put_flash(socket, :error, "카테고리 이름을 입력해주세요.")
+        {:noreply, socket}
+
+      category_name ->
+        case create_category(category_name, socket.assigns.current_user) do
+          {:ok, category} ->
+            # 대기 중인 포스트가 있으면 바로 카테고리 지정
+            pending_post_id = socket.assigns.pending_post_id
+
+            if pending_post_id do
+              case assign_post_category(pending_post_id, category.id, socket.assigns.current_user) do
+                {:ok, _post} ->
+                  # 포스트 목록 새로고침
+                  posts = list_posts(socket.assigns.current_user)
+
+                  filtered_posts =
+                    filter_posts_by_category(posts, socket.assigns.selected_category_id)
+
+                  socket =
+                    socket
+                    |> assign(:posts, filtered_posts)
+                    |> assign(:post_count, length(filtered_posts))
+                    |> assign(:categories, list_categories(socket.assigns.current_user))
+                    |> assign(:show_category_modal, false)
+                    |> assign(:pending_post_id, nil)
+                    |> assign(:category_form, %{})
+                    |> put_flash(:info, "새 카테고리가 생성되고 지정되었습니다!")
+
+                  {:noreply, socket}
+
+                {:error, _error} ->
+                  socket = put_flash(socket, :error, "카테고리 지정에 실패했습니다.")
+                  {:noreply, socket}
+              end
+            else
+              # 일반적인 카테고리 생성 (+ 새 카테고리 버튼에서 온 경우)
+              categories = list_categories(socket.assigns.current_user)
+
+              socket =
+                socket
+                |> assign(:categories, categories)
+                |> assign(:show_category_modal, false)
+                |> assign(:category_form, %{})
+                |> put_flash(:info, "카테고리가 생성되었습니다!")
+
+              {:noreply, socket}
+            end
+
+          {:error, error} ->
+            error_message =
+              case error do
+                %{errors: [%{message: message}]} -> message
+                _ -> "카테고리 생성에 실패했습니다."
+              end
+
+            socket = put_flash(socket, :error, error_message)
+            {:noreply, socket}
+        end
+    end
+  end
+
+  # 카테고리 모달 컨텐츠 클릭 (이벤트 버블링 방지)
+  @impl true
+  def handle_event("category_modal_content_click", _params, socket) do
+    {:noreply, socket}
+  end
+
+  # 포스트에 카테고리 지정
+  @impl true
+  def handle_event("assign_category_to_post", %{"category-id" => category_id}, socket) do
+    pending_post_id = socket.assigns.pending_post_id
+
+    if pending_post_id do
+      # 카테고리 ID가 빈 문자열이면 nil로 변환
+      category_id = if category_id == "", do: nil, else: category_id
+
+      case assign_post_category(pending_post_id, category_id, socket.assigns.current_user) do
+        {:ok, _post} ->
+          # 포스트 목록 새로고침
+          posts = list_posts(socket.assigns.current_user)
+
+          # 필터링도 적용
+          filtered_posts = filter_posts_by_category(posts, socket.assigns.selected_category_id)
+
+          socket =
+            socket
+            |> assign(:posts, filtered_posts)
+            |> assign(:post_count, length(filtered_posts))
+            |> assign(:show_category_modal, false)
+            |> assign(:pending_post_id, nil)
+            |> assign(:category_form, %{})
+            |> put_flash(:info, "카테고리가 지정되었습니다!")
+
+          {:noreply, socket}
+
+        {:error, _error} ->
+          socket = put_flash(socket, :error, "카테고리 지정에 실패했습니다.")
+          {:noreply, socket}
+      end
+    else
+      socket = put_flash(socket, :error, "지정할 포스트를 찾을 수 없습니다.")
+      {:noreply, socket}
+    end
+  end
+
+  # 카테고리 지정 건너뛰기
+  @impl true
+  def handle_event("skip_category_assignment", _params, socket) do
+    socket =
+      socket
+      |> assign(:show_category_modal, false)
+      |> assign(:pending_post_id, nil)
+      |> assign(:category_form, %{})
+      |> put_flash(:info, "포스트가 생성되었습니다!")
 
     {:noreply, socket}
   end
@@ -355,6 +537,12 @@ defmodule OfftherecordWeb.PostsLive do
               modal_image_url={@modal_image_url}
             />
           </.content_container>
+          
+    <!-- 카테고리 가로 스크롤 (하단 고정) -->
+          <.category_horizontal_list
+            categories={@categories}
+            selected_category_id={@selected_category_id}
+          />
 
           <.compose_modal
             show={@show_compose_modal}
@@ -366,6 +554,13 @@ defmodule OfftherecordWeb.PostsLive do
             upload_error={@upload_error}
             current_user={@current_user}
           />
+
+          <.create_category_modal
+            show={@show_category_modal}
+            categories={@categories}
+            category_form={@category_form}
+            pending_post_id={@pending_post_id}
+          />
         </.app_container>
       </body>
     </html>
@@ -374,7 +569,11 @@ defmodule OfftherecordWeb.PostsLive do
 
   # Private functions for data operations
   defp list_posts(current_user) do
-    case Ash.read(Post, domain: Offtherecord.Record, actor: current_user, load: [:user]) do
+    case Ash.read(Post,
+           domain: Offtherecord.Record,
+           actor: current_user,
+           load: [:user, :category]
+         ) do
       {:ok, posts} ->
         posts
         |> Enum.sort_by(& &1.created_at, {:desc, DateTime})
@@ -382,6 +581,33 @@ defmodule OfftherecordWeb.PostsLive do
       {:error, _} ->
         []
     end
+  end
+
+  defp list_categories(current_user) do
+    alias Offtherecord.Record.Category
+
+    case Ash.read(Category, domain: Offtherecord.Record, actor: current_user) do
+      {:ok, categories} ->
+        categories
+        |> Enum.sort_by(& &1.inserted_at, {:asc, DateTime})
+
+      {:error, _} ->
+        []
+    end
+  end
+
+  defp filter_posts_by_category(posts, nil), do: posts
+
+  defp filter_posts_by_category(posts, category_id) do
+    Enum.filter(posts, &(&1.category_id == category_id))
+  end
+
+  defp create_category(name, current_user) do
+    alias Offtherecord.Record.Category
+
+    Category
+    |> Ash.Changeset.for_create(:create, %{name: name}, actor: current_user)
+    |> Ash.create(domain: Offtherecord.Record)
   end
 
   defp create_post(attrs, current_user) do
@@ -396,6 +622,20 @@ defmodule OfftherecordWeb.PostsLive do
         post
         |> Ash.Changeset.for_destroy(:destroy)
         |> Ash.destroy(domain: Offtherecord.Record, actor: current_user)
+
+      {:error, _} ->
+        {:error, :not_found}
+    end
+  end
+
+  defp assign_post_category(post_id, category_id, current_user) do
+    case Ash.get(Post, post_id, domain: Offtherecord.Record, actor: current_user) do
+      {:ok, post} ->
+        post
+        |> Ash.Changeset.for_update(:assign_category, %{category_id: category_id},
+          actor: current_user
+        )
+        |> Ash.update(domain: Offtherecord.Record)
 
       {:error, _} ->
         {:error, :not_found}
